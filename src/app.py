@@ -32,7 +32,7 @@ def get_members():
     response_body = {"family": members}
     return jsonify(response_body), 200
 
-# peticion por id
+# metodo get  por id
 @app.route('/members/<int:member_id>', methods=['GET'])
 def get_members_id(member_id):
     # this is how you can use the Family datastructure by calling its methods
@@ -45,8 +45,43 @@ def get_members_id(member_id):
 
     return jsonify(member), 200
 
+#Metodo post crea member
+@app.route('/member', methods=['POST'])
+def add_member():
+    request_data = request.get_json()
+    new_member = {
+    "first_name": request_data['first_name'],
+    "last_name": jackson_family.last_name, 
+    "age": request_data['age'],
+    "lucky_numbers": request_data['lucky_numbers'],
+    "id": jackson_family._generateId()
+    }
+    jackson_family.add_member(new_member)
+    return jsonify(new_member), 200
+ 
+#Metodo Delete por id
+@app.route('/members/<int:member_id>', methods=['DELETE'])
+def delete_member_id(member_id):
+    member = jackson_family.delete_member(member_id)
+    if member:
+        return jsonify({
+            'message':'successfully removed',
+            'status_code': 200            
+    })
+    else:
+        return jsonify({
+            'message_error': 'error_request',
+            'status_code': 400
+        })
+
+
+    
+
+
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3000))
     app.run(host='0.0.0.0', port=PORT, debug=True)
+
+
