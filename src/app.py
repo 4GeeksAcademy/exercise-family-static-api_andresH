@@ -29,8 +29,13 @@ def sitemap():
 def get_members():
     # this is how you can use the Family datastructure by calling its methods
     members = jackson_family.get_all_members()
-    response_body = {"family": members}
-    return jsonify(response_body), 200
+
+    if members:
+        response_body = {"family": members}
+        return jsonify(response_body), 200
+    else:
+        return {'message_error': 'Error en la solicitud'}
+
 
 # metodo get  por id
 @app.route('/members/<int:member_id>', methods=['GET'])
@@ -38,17 +43,20 @@ def get_members_id(member_id):
     # this is how you can use the Family datastructure by calling its methods
     member = jackson_family.get_member(member_id)
     
-    if not member:
+    if member:
+        return jsonify(member), 200
+    else: 
         return jsonify({
             'message_error': 'member not found'
         }), 400
 
-    return jsonify(member), 200
 
 #Metodo post crea member
 @app.route('/member', methods=['POST'])
 def add_member():
+    
     request_data = request.get_json()
+    
     new_member = {
     "first_name": request_data['first_name'],
     "last_name": jackson_family.last_name, 
@@ -56,27 +64,28 @@ def add_member():
     "lucky_numbers": request_data['lucky_numbers'],
     "id": jackson_family._generateId()
     }
+
+    if request_data is None:
+        return "El cuerpo de la solicitud es null", 400
+    if 'first_name' not in request_data:
+        return 'Debes especificar first_name', 400
+    if 'age' not in request_data:
+        return 'Debes especificar age', 400
+    if 'lucky_numbers' not in request_data:
+        return 'Debes especificar lucky_numbers', 400
+        
     jackson_family.add_member(new_member)
-    return jsonify(new_member), 200
+
+    return "ok", 200
+        
+        
  
 #Metodo Delete por id
 @app.route('/members/<int:member_id>', methods=['DELETE'])
 def delete_member_id(member_id):
-    member = jackson_family.delete_member(member_id)
-    if member:
-        return jsonify({
-            'message':'successfully removed',
-            'status_code': 200            
-    })
-    else:
-        return jsonify({
-            'message_error': 'error_request',
-            'status_code': 400
-        })
-
-
-    
-
+    jackson_family.delete_member(member_id)
+    return jsonify({'status_code': 200}), 400
+ 
 
 
 # this only runs if `$ python src/app.py` is executed
